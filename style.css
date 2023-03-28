@@ -1,16 +1,31 @@
+@font-face {
+  font-family: "Inconsolata";
+  src: url(./font/Inconsolata.ttf);
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Inconsolata", Arial, sans-serif;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
   margin: 0;
   background-color: #eee;
+  background-color: #d6d6d6;
 }
 
 .container {
   display: flex;
   flex-direction: column;
+}
+
+.footer {
+  background-color: antiquewhite;
+  padding: 20px;
+  margin-top: 60px;
+  margin-left: 40px;
+  border-radius: 8px;
 }
 
 .board {
