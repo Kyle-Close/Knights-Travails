@@ -14,6 +14,9 @@ resetButton.addEventListener("click", () => {
 calculateButton.addEventListener("click", () => {
   let startPosition = gameBoard.knightStartPosition;
   let endPosition = gameBoard.knightEndPosition;
+  // Check if startPosition & endPositon exist. If not, abort.
+  // If shortestPath exists, it's already been calculated.
+  if (!startPosition || !endPosition || gameBoard.shortestPath) return;
   // Get the positions and create the start and end nodes
   startPosition = startPosition.dataset.position;
   endPosition = endPosition.dataset.position;
@@ -23,6 +26,8 @@ calculateButton.addEventListener("click", () => {
   // Create the two nodes
   let startNode = new Node(startFinalArray);
   // Find shortest path
-  let shortestPath = Node.shortestPath(startNode, endFinalArray);
-  Board.displayShortestPath(shortestPath);
+  gameBoard.shortestPath = Node.shortestPath(startNode, endFinalArray);
+  // Display shortest path
+  Board.displayShortestPath(gameBoard.shortestPath);
+  console.log("test");
 });

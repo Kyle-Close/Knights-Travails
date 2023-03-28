@@ -1,11 +1,12 @@
 export class Board {
   constructor() {
     this.chessboardDom = document.querySelector(".chessboard");
-    this.__knightStartPosition = null;
+    this._knightStartPosition = null;
     this._knightEndPosition = null;
     this.lastHoveredCell = null;
     this.startText = document.querySelector(".start");
     this.endText = document.querySelector(".end");
+    this.shortestPath = null;
   }
 
   get knightStartPosition() {
@@ -27,31 +28,38 @@ export class Board {
 
       stack.push(domNode);
       node = node.parent;
-      //domNode.style.backgroundColor = "blue";
-      //domNode.style.opacity = 0.5;
-
-      //domNode.textContent = count;
     }
 
     let count = 0;
     while (stack.length > 0) {
       let current = stack.pop();
       current.style.backgroundColor = "rgba(0, 0, 255, 0.5)";
-      current.style.color = "green";
+      current.style.color = "orange";
       current.style.fontSize = "2rem";
       current.textContent = count++;
-      console.log(current);
     }
   }
 
   reset() {
-    this.startText.textContent = "Start: {x,x}";
-    this.endText.textContent = "End: {x,x}";
-    this._knightStartPosition.querySelector("div").remove();
+    // If knightStartPosition is not populated abort. No need to reset
+    if (!this.knightStartPosition) return;
+    let startPosition = this._knightStartPosition;
+    let endPosition = this._knightEndPosition;
+
+    this.startText.textContent = "Start: {  }";
+    this.endText.textContent = "End: {  }";
+    if (!this.shortestPath) {
+      if (startPosition) startPosition.removeChild(startPosition.firstChild);
+      if (endPosition) endPosition.removeChild(endPosition.firstChild);
+    }
+
     this._knightStartPosition = null;
-    this._knightEndPosition.querySelector("div").remove();
     this._knightEndPosition = null;
     this.lastHoveredCell = null;
+    if (this.shortestPath) {
+      this.clearShortestPath(); // Clear dom nodes
+      this.shortestPath = null;
+    }
   }
 
   displayEmptyBoard() {
@@ -120,7 +128,10 @@ export class Board {
       // Remove styling
       this.removeHighlight(e.target);
       this._knightStartPosition = e.target;
-      this.startText.textContent = `Start: ${this._knightStartPosition.dataset.position}`;
+      let startRank = this._knightStartPosition.dataset.position[1];
+      let startFile = this._knightStartPosition.dataset.position[4];
+      let conversion = convertCoordinates([startRank, startFile]);
+      this.startText.textContent = `Start: {${conversion[0]}${conversion[1]}}`;
     } else {
       let knightEnd = document.createElement("div");
       knightEnd.style.backgroundColor = "red";
@@ -131,7 +142,10 @@ export class Board {
       // Remove highlight styling
       this.removeHighlight(e.target);
       this._knightEndPosition = e.target;
-      this.endText.textContent = `End: ${this._knightEndPosition.dataset.position}`;
+      let endRank = this._knightEndPosition.dataset.position[1];
+      let endFile = this._knightEndPosition.dataset.position[4];
+      let conversion = convertCoordinates([endRank, endFile]);
+      this.endText.textContent = `End: {${conversion[0]}${conversion[1]}}`;
     }
   }
 
@@ -142,6 +156,22 @@ export class Board {
       cell.style.backgroundColor = "black";
     }
     cell.style.opacity = 1;
+  }
+
+  clearShortestPath(node = this.shortestPath) {
+    // Base case
+    if (!node) return;
+    let domNode = findElementByCustomProperty(
+      "data-position",
+      `{${node.position[0]}, ${node.position[1]}}`
+    );
+    // Clear the number
+    domNode.firstChild.remove();
+    // Set the background color
+    if (domNode.classList.contains("white")) {
+      domNode.style.backgroundColor = "white";
+    } else domNode.style.backgroundColor = "black";
+    this.clearShortestPath(node.parent);
   }
 }
 
@@ -166,4 +196,12 @@ function findElementByCustomProperty(property, value) {
     }
   }
   return null;
+}
+
+function convertCoordinates(coords) {
+  let rank = coords[0];
+  let file = coords[1];
+  const rankConversion = [8, 7, 6, 5, 4, 3, 2, 1];
+  const fileConversion = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  return [fileConversion[file], rankConversion[rank]];
 }
